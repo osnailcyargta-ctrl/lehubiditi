@@ -20,14 +20,10 @@ Atau jalankan lokal: clone repo ini lalu buka `index.html` di browser. Selesai �
 
 ## 🎮 Kontrol
 
-**Keyboard:**
 - `WASD` / panah — gerak
-- `Spasi` / `J` — tebas pedang
+- **Klik kiri mouse** — tebas pedang ke arah kursor (bisa diagonal)
+- `Spasi` / `J` — tebas pedang ke arah hadap
 - `E` / `Enter` — bicara dengan NPC / konfirmasi
-
-**HP / tablet (touchscreen):**
-- Geser di **kiri layar** — joystick virtual untuk gerak
-- Tap di **kanan layar** — serang / bicara
 
 ## ✨ Fitur
 
