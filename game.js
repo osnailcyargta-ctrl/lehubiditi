@@ -163,7 +163,7 @@ const player = {
   speed: 150, dir: 'down',
   hp: 50, maxHp: 50, atk: 10,
   lvl: 1, xp: 0,
-  attackT: 0, attackCd: 0, invuln: 0,
+  attackT: 0, attackCd: 0, invuln: 0, attackAngle: Math.PI / 2,
   vx: 0, vy: 0, walkT: 0,
 };
 const xpNeed = () => player.lvl * 20;
@@ -257,7 +257,7 @@ function setupWorld() {
       name: 'Bocah Udin', x: (VILLAGE.x) * TILE, y: (VILLAGE.y + 3) * TILE, color: '#a7c8e8',
       talk: () => [
         'Kak Raka! Katanya hantu di kuburan bisa nembus pohon dan air!',
-        'Serem... tapi kakak pasti bisa. Tebas pakai [SPASI] ya kak!',
+        'Serem... tapi kakak pasti bisa. Tebas pakai klik kiri ya kak!',
       ],
     },
   ];
@@ -301,40 +301,27 @@ window.addEventListener('keydown', (e) => {
 });
 window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
 
-// Touch: setengah kiri layar = joystick, setengah kanan = serang/interaksi
-const touch = { active: false, id: null, sx: 0, sy: 0, dx: 0, dy: 0 };
-let isTouchDevice = false;
-function canvasPos(t) {
+// Mouse: klik kiri = serang ke arah kursor
+const mouse = { x: W / 2, y: H / 2 };
+let mouseAttack = false;
+function canvasPos(e) {
   const r = cv.getBoundingClientRect();
-  return { x: (t.clientX - r.left) / r.width * W, y: (t.clientY - r.top) / r.height * H };
+  return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H };
 }
-cv.addEventListener('touchstart', (e) => {
-  e.preventDefault(); isTouchDevice = true;
-  for (const t of e.changedTouches) {
-    const p = canvasPos(t);
-    if (state !== STATE.PLAY) { confirmPressed = true; interactPressed = true; continue; }
-    if (p.x < W / 2 && !touch.active) {
-      touch.active = true; touch.id = t.identifier;
-      touch.sx = p.x; touch.sy = p.y; touch.dx = 0; touch.dy = 0;
-    } else {
-      attackPressed = true; interactPressed = true;
-    }
+cv.addEventListener('mousemove', (e) => {
+  const p = canvasPos(e);
+  mouse.x = p.x; mouse.y = p.y;
+});
+cv.addEventListener('mousedown', (e) => {
+  if (e.button !== 0) return;
+  if (state === STATE.PLAY) {
+    attackPressed = true;
+    mouseAttack = true;
+  } else {
+    confirmPressed = true; interactPressed = true;
   }
-}, { passive: false });
-cv.addEventListener('touchmove', (e) => {
-  e.preventDefault();
-  for (const t of e.changedTouches) {
-    if (touch.active && t.identifier === touch.id) {
-      const p = canvasPos(t);
-      touch.dx = p.x - touch.sx; touch.dy = p.y - touch.sy;
-    }
-  }
-}, { passive: false });
-cv.addEventListener('touchend', (e) => {
-  e.preventDefault();
-  for (const t of e.changedTouches)
-    if (touch.active && t.identifier === touch.id) { touch.active = false; touch.dx = touch.dy = 0; }
-}, { passive: false });
+});
+cv.addEventListener('contextmenu', (e) => e.preventDefault());
 
 // ---------- Tabrakan ----------
 function collideMove(ent, dx, dy) {
@@ -412,10 +399,6 @@ function updatePlay(dt) {
   if (keys['s'] || keys['arrowdown']) my += 1;
   if (keys['a'] || keys['arrowleft']) mx -= 1;
   if (keys['d'] || keys['arrowright']) mx += 1;
-  if (touch.active) {
-    const m = Math.hypot(touch.dx, touch.dy);
-    if (m > 12) { mx = touch.dx / m; my = touch.dy / m; }
-  }
   const ml = Math.hypot(mx, my);
   if (ml > 0) {
     mx /= ml; my /= ml;
@@ -440,15 +423,25 @@ function updatePlay(dt) {
     player.attackT = 0.18;
     player.attackCd = 0.35;
     sfx.swing();
-    const dirA = { up: -Math.PI / 2, down: Math.PI / 2, left: Math.PI, right: 0 }[player.dir];
+    let dirA;
+    if (mouseAttack) {
+      // serang ke arah kursor mouse (posisi dunia)
+      dirA = Math.atan2(mouse.y + cam.y - player.y, mouse.x + cam.x - player.x);
+      player.dir = Math.abs(Math.cos(dirA)) > Math.abs(Math.sin(dirA))
+        ? (Math.cos(dirA) > 0 ? 'right' : 'left')
+        : (Math.sin(dirA) > 0 ? 'down' : 'up');
+    } else {
+      dirA = { up: -Math.PI / 2, down: Math.PI / 2, left: Math.PI, right: 0 }[player.dir];
+    }
+    player.attackAngle = dirA;
     for (const e of enemies) {
       const dx = e.x - player.x, dy = e.y - player.y;
       const d = Math.hypot(dx, dy);
-      if (d < 46 + e.size / 2) {
+      if (d < 54 + e.size / 2) {
         const da = Math.atan2(dy, dx);
         let diff = Math.abs(da - dirA);
         if (diff > Math.PI) diff = Math.PI * 2 - diff;
-        if (diff < 1.15) {
+        if (diff < 1.3) {
           e.hp -= player.atk;
           e.hitT = 0.15;
           const kb = e.type === 'boss' ? 60 : 160;
@@ -460,7 +453,7 @@ function updatePlay(dt) {
       }
     }
   }
-  attackPressed = false; interactPressed = false;
+  attackPressed = false; interactPressed = false; mouseAttack = false;
 
   // --- musuh ---
   for (const e of enemies) {
@@ -562,7 +555,7 @@ function updatePlay(dt) {
     hint = `Cari ${next.name} di ${where}  (${taken}/3)`;
   }
   const nearNpc = npcs.some(n => Math.hypot(n.x + 16 - player.x, n.y + 16 - player.y) < 52);
-  if (nearNpc) hint = isTouchDevice ? 'Tap kanan layar untuk bicara' : 'Tekan [E] untuk bicara';
+  if (nearNpc) hint = 'Tekan [E] untuk bicara';
 }
 
 // ---------- Kamera ----------
@@ -677,7 +670,7 @@ function drawPlayer() {
   }
   // pedang saat menyerang
   if (player.attackT > 0) {
-    const dirA = { up: -Math.PI / 2, down: Math.PI / 2, left: Math.PI, right: 0 }[player.dir];
+    const dirA = player.attackAngle;
     const prog = 1 - player.attackT / 0.18;
     const a = dirA - 1.0 + prog * 2.0;
     cx.save();
@@ -894,19 +887,6 @@ function drawHud() {
     cx.textAlign = 'center';
     cx.fillText(hint, W / 2, H - 18);
   }
-  // joystick visual (touch)
-  if (touch.active) {
-    cx.globalAlpha = 0.3;
-    cx.strokeStyle = '#fff'; cx.lineWidth = 2;
-    cx.beginPath(); cx.arc(touch.sx, touch.sy, 36, 0, Math.PI * 2); cx.stroke();
-    const m = Math.hypot(touch.dx, touch.dy) || 1;
-    const cl = Math.min(m, 36);
-    cx.fillStyle = '#fff';
-    cx.beginPath();
-    cx.arc(touch.sx + (touch.dx / m) * cl, touch.sy + (touch.dy / m) * cl, 14, 0, Math.PI * 2);
-    cx.fill();
-    cx.globalAlpha = 1;
-  }
 }
 
 function drawDialog() {
@@ -931,7 +911,7 @@ function drawDialog() {
   cx.fillStyle = '#aaa'; cx.font = '11px monospace'; cx.textAlign = 'right';
   const more = d.i < d.lines.length - 1;
   cx.fillText(
-    (isTouchDevice ? 'tap' : '[E]') + (more ? ' lanjut ▸' : ' tutup ✕'),
+    '[E]' + (more ? ' lanjut ▸' : ' tutup ✕'),
     W - 80, H - 52
   );
 }
@@ -972,11 +952,11 @@ function drawTitle() {
   cx.restore();
   cx.fillStyle = Math.floor(time * 2) % 2 === 0 ? '#fff' : '#888';
   cx.font = 'bold 18px monospace';
-  cx.fillText(isTouchDevice ? 'TAP UNTUK MULAI' : 'TEKAN [ENTER] UNTUK MULAI', W / 2, H / 2 + 80);
+  cx.fillText('TEKAN [ENTER] ATAU KLIK UNTUK MULAI', W / 2, H / 2 + 80);
   cx.fillStyle = '#888';
   cx.font = '13px monospace';
-  cx.fillText('WASD/panah: gerak    SPASI: serang    E: bicara', W / 2, H / 2 + 120);
-  cx.fillText('HP: geser kiri layar = gerak, tap kanan = serang', W / 2, H / 2 + 142);
+  cx.fillText('WASD/panah: gerak    KLIK KIRI: serang ke arah kursor', W / 2, H / 2 + 120);
+  cx.fillText('SPASI/J: serang ke arah hadap    E: bicara dengan NPC', W / 2, H / 2 + 142);
   if (hasSave()) {
     cx.fillStyle = '#7CFC9A';
     cx.fillText('Save ditemukan — progres dilanjutkan. [Backspace] hapus save.', W / 2, H / 2 + 175);
@@ -995,7 +975,7 @@ function drawDead(dt) {
     cx.fillStyle = '#fff';
     cx.font = '16px monospace';
     cx.fillText(
-      (isTouchDevice ? 'Tap' : 'Tekan [ENTER]') + ' untuk bangkit di desa (progres aman)',
+      'Tekan [ENTER] atau klik untuk bangkit di desa (progres aman)',
       W / 2, H / 2 + 30
     );
     if (confirmPressed) {
@@ -1043,7 +1023,7 @@ function drawWin(dt) {
     cx.fillStyle = Math.floor(time * 2) % 2 === 0 ? '#fff' : '#888';
     cx.font = 'bold 15px monospace';
     cx.fillText(
-      (isTouchDevice ? 'Tap' : '[ENTER]') + ' untuk main lagi dari awal',
+      '[ENTER] atau klik untuk main lagi dari awal',
       W / 2, H / 2 + 130
     );
     if (confirmPressed) {
@@ -1120,3 +1100,10 @@ function frame(t) {
 
 setupWorld();
 requestAnimationFrame(frame);
+
+// hook debug untuk pengujian otomatis (tidak dipakai gameplay)
+window.__pusaka = {
+  player,
+  get enemies() { return enemies; },
+  get state() { return state; },
+};
