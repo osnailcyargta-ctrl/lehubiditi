@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
@@ -29,6 +28,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.unit.dp
 import com.blockforge.editor.EditorViewModel
 import com.blockforge.editor.ui.theme.ForgeColors
+import com.blockforge.editor.ui.theme.ForgeIcons
 import com.blockforge.engine.GameView
 import com.blockforge.engine.model.GameProject
 import com.blockforge.engine.runtime.FileResourceProvider
@@ -113,7 +113,7 @@ fun PlayPanel(vm: EditorViewModel, modifier: Modifier = Modifier) {
             )
             IconButton(onClick = { paused = !paused }) {
                 Icon(
-                    if (paused) Icons.Default.PlayArrow else Icons.Default.Pause,
+                    if (paused) Icons.Default.PlayArrow else ForgeIcons.Pause,
                     contentDescription = if (paused) "Lanjutkan" else "Jeda",
                     tint = ForgeColors.Accent
                 )

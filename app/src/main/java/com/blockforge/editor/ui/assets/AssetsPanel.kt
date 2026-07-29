@@ -20,8 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -46,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.blockforge.editor.EditorViewModel
 import com.blockforge.editor.ui.theme.ForgeColors
+import com.blockforge.editor.ui.theme.ForgeIcons
 import com.blockforge.engine.model.AssetKind
 import com.blockforge.engine.model.VariableKind
 import com.blockforge.engine.model.VariableScope
@@ -76,7 +75,7 @@ fun AssetsPanel(vm: EditorViewModel, modifier: Modifier = Modifier) {
         item { SectionHeader("Gambar / Sprite") }
         item {
             OutlinedButton(onClick = { imagePicker.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Default.Image, contentDescription = null)
+                Icon(ForgeIcons.Picture, contentDescription = null)
                 Text("  Unggah gambar (PNG / JPG / WebP)")
             }
         }
@@ -84,7 +83,7 @@ fun AssetsPanel(vm: EditorViewModel, modifier: Modifier = Modifier) {
             AssetRow(
                 title = asset.name,
                 subtitle = asset.fileName,
-                icon = Icons.Default.Image,
+                icon = ForgeIcons.Picture,
                 tint = ForgeColors.Accent,
                 onRename = { vm.renameAsset(asset.id, it) },
                 onDelete = { vm.deleteAsset(asset.id) }
@@ -94,7 +93,7 @@ fun AssetsPanel(vm: EditorViewModel, modifier: Modifier = Modifier) {
         item { SectionHeader("Suara / Musik") }
         item {
             OutlinedButton(onClick = { audioPicker.launch("audio/*") }, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Default.GraphicEq, contentDescription = null)
+                Icon(ForgeIcons.AudioTrack, contentDescription = null)
                 Text("  Unggah MP3 / WAV / OGG")
             }
         }
@@ -102,7 +101,7 @@ fun AssetsPanel(vm: EditorViewModel, modifier: Modifier = Modifier) {
             AssetRow(
                 title = asset.name,
                 subtitle = asset.fileName,
-                icon = Icons.Default.GraphicEq,
+                icon = ForgeIcons.AudioTrack,
                 tint = Color(0xFFE0559B),
                 onRename = { vm.renameAsset(asset.id, it) },
                 onDelete = { vm.deleteAsset(asset.id) }

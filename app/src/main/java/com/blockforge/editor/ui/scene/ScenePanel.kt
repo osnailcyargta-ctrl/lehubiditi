@@ -19,9 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.blockforge.editor.EditorViewModel
 import com.blockforge.editor.ui.theme.ForgeColors
+import com.blockforge.editor.ui.theme.ForgeIcons
 import com.blockforge.engine.model.AssetKind
 import com.blockforge.engine.model.GameObject
 import com.blockforge.engine.model.ObjectShape
@@ -89,7 +88,7 @@ fun ScenePanel(vm: EditorViewModel, modifier: Modifier = Modifier) {
                 )
             }
             IconButton(onClick = { showInspector = true }, enabled = selected != null) {
-                Icon(Icons.Default.Tune, contentDescription = "Properti objek", tint = ForgeColors.Accent)
+                Icon(ForgeIcons.Tune, contentDescription = "Properti objek", tint = ForgeColors.Accent)
             }
         }
 
@@ -131,7 +130,7 @@ private fun ObjectInspector(vm: EditorViewModel, obj: GameObject, onClose: () ->
             Text("Properti objek", style = MaterialTheme.typography.titleLarge, color = ForgeColors.TextPrimary)
             Box(Modifier.weight(1f))
             IconButton(onClick = { vm.duplicateObject(obj.id) }) {
-                Icon(Icons.Default.ContentCopy, contentDescription = "Duplikat", tint = ForgeColors.TextMuted)
+                Icon(ForgeIcons.Copy, contentDescription = "Duplikat", tint = ForgeColors.TextMuted)
             }
             IconButton(onClick = { vm.deleteObject(obj.id); onClose() }) {
                 Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = ForgeColors.Danger)

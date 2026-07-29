@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -54,6 +52,7 @@ import com.blockforge.editor.ui.blocks.BlocksPanel
 import com.blockforge.editor.ui.play.PlayPanel
 import com.blockforge.editor.ui.scene.ScenePanel
 import com.blockforge.editor.ui.theme.ForgeColors
+import com.blockforge.editor.ui.theme.ForgeIcons
 import com.blockforge.engine.model.AssetKind
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -127,7 +126,7 @@ fun EditorScreen(vm: EditorViewModel) {
                 },
                 actions = {
                     IconButton(onClick = { showProjects = true }) {
-                        Icon(Icons.Default.Folder, contentDescription = "Proyek", tint = ForgeColors.TextMuted)
+                        Icon(ForgeIcons.Folder, contentDescription = "Proyek", tint = ForgeColors.TextMuted)
                     }
                     IconButton(onClick = { showSettings = true }) {
                         Icon(Icons.Default.Settings, contentDescription = "Pengaturan", tint = ForgeColors.TextMuted)
@@ -139,7 +138,7 @@ fun EditorScreen(vm: EditorViewModel) {
                         if (exporting) {
                             CircularProgressIndicator(modifier = Modifier.padding(4.dp), strokeWidth = 2.dp)
                         } else {
-                            Icon(Icons.Default.Android, contentDescription = "Ekspor proyek Android", tint = ForgeColors.Success)
+                            Icon(ForgeIcons.Android, contentDescription = "Ekspor proyek Android", tint = ForgeColors.Success)
                         }
                     }
                 }

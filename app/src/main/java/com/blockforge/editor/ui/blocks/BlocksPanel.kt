@@ -21,13 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CallSplit
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Redo
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
@@ -52,6 +47,7 @@ import com.blockforge.editor.EditorViewModel
 import com.blockforge.editor.SlotTarget
 import com.blockforge.editor.ui.play.GamePlayer
 import com.blockforge.editor.ui.theme.ForgeColors
+import com.blockforge.editor.ui.theme.ForgeIcons
 import com.blockforge.engine.blocks.BlockCatalog
 import com.blockforge.engine.blocks.BlockShape
 import com.blockforge.engine.blocks.BlockTree
@@ -221,14 +217,14 @@ private fun Toolbar(vm: EditorViewModel, preview: Boolean, onTogglePreview: () -
             }
         }
         IconButton(onClick = { vm.undo() }, enabled = vm.canUndo) {
-            Icon(Icons.Default.Undo, contentDescription = "Urungkan", tint = ForgeColors.TextMuted)
+            Icon(ForgeIcons.Undo, contentDescription = "Urungkan", tint = ForgeColors.TextMuted)
         }
         IconButton(onClick = { vm.redo() }, enabled = vm.canRedo) {
-            Icon(Icons.Default.Redo, contentDescription = "Ulangi", tint = ForgeColors.TextMuted)
+            Icon(ForgeIcons.Redo, contentDescription = "Ulangi", tint = ForgeColors.TextMuted)
         }
         IconButton(onClick = onTogglePreview) {
             Icon(
-                if (preview) Icons.Default.Stop else Icons.Default.PlayArrow,
+                if (preview) ForgeIcons.Stop else Icons.Default.PlayArrow,
                 contentDescription = "Pratinjau langsung",
                 tint = if (preview) ForgeColors.Danger else ForgeColors.Success
             )
@@ -264,7 +260,7 @@ private fun SelectedBlockBar(vm: EditorViewModel, blockId: String, type: String)
         if (def?.shape == BlockShape.BRANCH) {
             AssistChip(
                 onClick = { vm.addBranch(blockId) },
-                leadingIcon = { Icon(Icons.Default.CallSplit, contentDescription = null) },
+                leadingIcon = { Icon(ForgeIcons.Branch, contentDescription = null) },
                 label = { Text("Cabang") }
             )
         }
@@ -272,7 +268,7 @@ private fun SelectedBlockBar(vm: EditorViewModel, blockId: String, type: String)
             TextButton(onClick = { vm.wrapInControl(blockId, "control.if") }) { Text("Bungkus jika") }
         }
         IconButton(onClick = { vm.duplicateBlock(blockId) }) {
-            Icon(Icons.Default.ContentCopy, contentDescription = "Duplikat", tint = ForgeColors.TextMuted)
+            Icon(ForgeIcons.Copy, contentDescription = "Duplikat", tint = ForgeColors.TextMuted)
         }
         IconButton(onClick = { vm.deleteBlock(blockId) }) {
             Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = ForgeColors.Danger)
