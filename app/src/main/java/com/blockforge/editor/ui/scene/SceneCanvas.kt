@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
@@ -110,7 +111,7 @@ fun SceneCanvas(
         ) {
             val fit = fitOf(size.width, size.height, design, pan, zoom)
             translate(fit.offsetX, fit.offsetY) {
-                androidx.compose.ui.graphics.drawscope.scale(fit.scale, fit.scale, pivot = Offset.Zero) {
+                scale(fit.scale, fit.scale, pivot = Offset.Zero) {
                     drawRect(
                         color = Color(scene.backgroundColor ?: project.settings.backgroundColor),
                         size = design

@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -260,11 +261,11 @@ private fun forbiddenLanes(layout: ScriptLayout, dragged: LaidBlock): Set<String
 
 // ---- drawing -----------------------------------------------------------------------------------
 
-private inline fun DrawScope.scaleAround(factor: Float, block: DrawScope.() -> Unit) {
+private inline fun DrawScope.scaleAround(factor: Float, crossinline block: DrawScope.() -> Unit) {
     if (factor == 1f) {
         block(); return
     }
-    androidx.compose.ui.graphics.drawscope.scale(factor, factor, pivot = Offset.Zero) { block() }
+    scale(factor, factor, pivot = Offset.Zero) { block() }
 }
 
 private fun DrawScope.drawGrid(pan: Offset, zoom: Float) {
