@@ -66,7 +66,7 @@ data class ScriptLayout(
 ) {
     fun block(id: String): LaidBlock? = blocks.firstOrNull { it.node.id == id }
 
-    /** Topmost block under the point. Blocks are ordered parents-before-children, so search backwards. */
+    /** Block under the point. Lanes never overlap, so at most one block can match. */
     fun blockAt(x: Float, y: Float): LaidBlock? =
         blocks.lastOrNull { x >= it.x && x <= it.x + it.width && y >= it.y && y <= it.y + it.height }
 
