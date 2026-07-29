@@ -26,7 +26,18 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew :app:assembleDebug --console=plain 2>&1 | tee build.log
+
+      # Gradle's stack trace buries the compiler output; repeat just the errors at the end.
+      - name: Compiler errors
+        if: failure()
+        shell: bash
+        run: |
+          echo "--- Kotlin/Java errors ---"
+          grep -E "^(e:|error:)" build.log | head -80 || echo "(none found)"
 
       - name: Upload APK
         if: success()
