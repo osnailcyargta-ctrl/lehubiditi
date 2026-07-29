@@ -1,6 +1,5 @@
 package com.blockforge.engine.model
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -103,10 +102,7 @@ data class AssetRef(
 )
 
 @Serializable
-enum class AssetKind {
-    @SerialName("image") IMAGE,
-    @SerialName("audio") AUDIO
-}
+enum class AssetKind { IMAGE, AUDIO }
 
 @Serializable
 data class VariableDef(

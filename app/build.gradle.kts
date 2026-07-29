@@ -59,6 +59,13 @@ tasks.named("preBuild") {
     dependsOn(stageEngineSources, stageWrapper)
 }
 
+// The staged files land inside src/main/assets, so the asset merge has to wait for them.
+tasks.configureEach {
+    if (name.startsWith("merge") && name.endsWith("Assets")) {
+        dependsOn(stageEngineSources, stageWrapper)
+    }
+}
+
 dependencies {
     implementation(project(":engine"))
 

@@ -59,7 +59,9 @@ fun GamePlayer(
         factory = { context ->
             GameView(context).apply {
                 host = object : GameHost {
-                    override fun onError(message: String) = post { onError(message) }
+                    override fun onError(message: String) {
+                        post { onError(message) }
+                    }
                 }
                 onFrame = { ids ->
                     // Runs on the game thread; hop to the UI thread and only when the set changes,

@@ -386,7 +386,7 @@ private fun DrawScope.drawBlock(
     dragging: Boolean,
     pulse: Float
 ) {
-    val base = Color(block.def.color)
+    val base = Color(block.def.category.color)
     val radius = androidx.compose.ui.geometry.CornerRadius(16.dp.toPx())
     val topLeft = Offset(block.x, block.y)
     val size = Size(block.width, block.height)
