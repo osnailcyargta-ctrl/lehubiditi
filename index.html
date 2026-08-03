@@ -3,32 +3,229 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Pusaka Nusantara — Top-Down RPG</title>
+<title>Swipey Swipey — Rhythm Game</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d0820'/%3E%3Cpath d='M16 5l8 9h-4.6v13h-6.8V14H8z' fill='%23ff2e88'/%3E%3C/svg%3E">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #08060f;
+    --panel: #12102080;
+    --line: #ffffff1f;
+    --text: #e9e6ff;
+    --dim: #9a93b8;
+    --accent: #ff2e88;
+    --accent2: #22e0ff;
+  }
   html, body {
     width: 100%; height: 100%;
-    background: #0b0f1a;
+    background: var(--bg);
+    color: var(--text);
     overflow: hidden;
     touch-action: none;
-    font-family: 'Courier New', monospace;
+    -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
   }
-  #wrap {
-    width: 100%; height: 100%;
+  #game { display: block; width: 100%; height: 100%; touch-action: none; }
+
+  /* ---------- Editor modal ---------- */
+  #editor {
+    position: fixed; inset: 0; z-index: 50;
+    display: none;
+    background: #05040bd9;
+    backdrop-filter: blur(6px);
+    overflow-y: auto;
+    padding: 20px;
+  }
+  #editor.open { display: block; }
+  .ed-box {
+    max-width: 880px; margin: 0 auto;
+    background: #100e1c;
+    border: 1px solid #2e2a48;
+    border-radius: 14px;
+    box-shadow: 0 24px 70px #000000b3;
+    overflow: hidden;
+  }
+  .ed-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(90deg, #ff2e8826, #22e0ff1a);
+    border-bottom: 1px solid #2e2a48;
+  }
+  .ed-head h2 { font-size: 18px; letter-spacing: .06em; }
+  .ed-head .tag {
+    font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent2); border: 1px solid #22e0ff59;
+    padding: 3px 8px; border-radius: 99px;
+  }
+  .ed-head button { margin-left: auto; }
+  .ed-body { padding: 20px; display: grid; gap: 18px; }
+  .ed-sec {
+    border: 1px solid #262238; border-radius: 10px;
+    padding: 14px 16px; background: #0c0a16;
+  }
+  .ed-sec > h3 {
+    font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 12px;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+  .fld { display: flex; flex-direction: column; gap: 5px; }
+  .fld label { font-size: 11px; color: var(--dim); letter-spacing: .05em; }
+  input[type=text], input[type=number], select {
+    background: #17142a; color: var(--text);
+    border: 1px solid #322c4e; border-radius: 7px;
+    padding: 8px 10px; font: inherit; font-size: 13px;
+    min-width: 90px;
+  }
+  input[type=text]:focus, input[type=number]:focus, select:focus {
+    outline: none; border-color: var(--accent2);
+  }
+  button {
+    background: #211c3a; color: var(--text);
+    border: 1px solid #3b3460; border-radius: 8px;
+    padding: 9px 15px; font: inherit; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: .12s;
+  }
+  button:hover:not(:disabled) { background: #2d2650; border-color: #554a8a; }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover:not(:disabled) { background: #ff4d9c; border-color: #ff4d9c; }
+  button.ghost { background: transparent; }
+  button.danger { border-color: #7a2b40; color: #ff8fae; }
+  .hint { font-size: 11.5px; color: var(--dim); line-height: 1.55; margin-top: 9px; }
+  .hint b { color: #cfc7ee; }
+  .file-btn { position: relative; overflow: hidden; display: inline-block; }
+  .file-btn input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+
+  #recPad {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    height: 190px; margin-top: 12px;
+    touch-action: none;
+  }
+  .pad {
+    position: relative; border-radius: 10px;
+    border: 2px dashed #3a3360; background: #14112480;
     display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: var(--dim); letter-spacing: .1em;
+    overflow: hidden;
   }
-  canvas {
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    max-width: 100%;
-    max-height: 100%;
-    aspect-ratio: 16 / 10;
-    outline: none;
+  .pad.lit { border-style: solid; }
+  .pad .arrow {
+    position: absolute; font-size: 62px; font-weight: 900;
+    opacity: 0; transform: scale(.6); pointer-events: none;
   }
+  #recStrip { width: 100%; height: 66px; display: block; margin-top: 12px;
+    border: 1px solid #262238; border-radius: 8px; background: #0a0812; }
+  .stat-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 12px; font-size: 12px; }
+  .stat-row div { color: var(--dim); }
+  .stat-row b { color: var(--text); font-size: 15px; display: block; margin-top: 2px; }
+  #calMsg { font-size: 12px; color: var(--accent2); margin-top: 9px; min-height: 17px; }
+  .warn { color: #ffca4d; }
 </style>
 </head>
 <body>
-<div id="wrap"><canvas id="game" width="960" height="600"></canvas></div>
-<script src="game.js"></script>
+<canvas id="game"></canvas>
+
+<div id="editor">
+  <div class="ed-box">
+    <div class="ed-head">
+      <span class="tag">Ctrl + Alt + M</span>
+      <h2>STUDIO CHART — Bikin Level Sendiri</h2>
+      <button id="edClose" class="ghost">Tutup ✕</button>
+    </div>
+    <div class="ed-body">
+
+      <div class="ed-sec">
+        <h3>1 · Lagu &amp; Info Level</h3>
+        <div class="row">
+          <span class="file-btn"><button type="button">📁 Pilih Lagu (mp3/ogg/wav)</button>
+            <input type="file" id="edAudio" accept="audio/*"></span>
+          <button id="edBuiltin" type="button">🎵 Pakai Lagu Bawaan</button>
+          <div class="fld"><label>Judul</label><input type="text" id="edTitle" placeholder="Judul lagu"></div>
+          <div class="fld"><label>Artis</label><input type="text" id="edArtist" placeholder="Artis"></div>
+          <div class="fld"><label>BPM</label><input type="number" id="edBpm" value="120" min="40" max="300" step="0.5"></div>
+          <div class="fld"><label>Kesulitan</label>
+            <select id="edDiff"><option>Mudah</option><option selected>Normal</option><option>Susah</option><option>Gila</option></select>
+          </div>
+        </div>
+        <div class="hint" id="edAudioInfo">Belum ada lagu dipilih. BPM dipakai untuk fitur <b>snap</b> — kalau nggak tahu BPM-nya, matikan snap saja.</div>
+      </div>
+
+      <div class="ed-sec">
+        <h3>2 · Kalibrasi (biar not jatuh pas)</h3>
+        <div class="row">
+          <div class="fld"><label>Offset input (ms)</label><input type="number" id="edOffset" value="130" min="-200" max="500" step="5"></div>
+          <button id="edCalib" type="button">🎯 Kalibrasi Otomatis</button>
+          <div class="fld"><label>Snap ke grid</label>
+            <select id="edSnap">
+              <option value="0">Mati</option>
+              <option value="4">1/4 (ketukan)</option>
+              <option value="8" selected>1/8</option>
+              <option value="16">1/16</option>
+            </select>
+          </div>
+        </div>
+        <div id="calMsg"></div>
+        <div class="hint">
+          Manusia selalu telat sedikit dari bunyinya. Jadi waktu not yang disimpan =
+          <b>waktu swipe − offset</b>. Hasilnya: pas dimainkan, not sampai di garis hit tepat
+          saat kamu swipe di posisi yang sama. Klik <b>Kalibrasi Otomatis</b> untuk mengukur
+          keterlambatanmu sendiri (ikuti 16 bunyi metronom).
+        </div>
+      </div>
+
+      <div class="ed-sec">
+        <h3>3 · Rekam Gameplay</h3>
+        <div class="row">
+          <button id="edRec" class="primary" type="button" disabled>⏺ Mulai Rekam</button>
+          <button id="edStop" type="button" disabled>⏹ Stop</button>
+          <button id="edUndo" type="button">↩ Hapus Not Terakhir</button>
+          <button id="edClear" class="danger" type="button">🗑 Kosongkan</button>
+        </div>
+        <div id="recPad">
+          <div class="pad" data-lane="0">LANE KIRI<span class="arrow"></span></div>
+          <div class="pad" data-lane="1">LANE KANAN<span class="arrow"></span></div>
+        </div>
+        <canvas id="recStrip"></canvas>
+        <div class="stat-row">
+          <div>Waktu<b id="edTime">0.00s</b></div>
+          <div>Jumlah Not<b id="edCount">0</b></div>
+          <div>Not/detik<b id="edNps">0.0</b></div>
+          <div>Status<b id="edState">Siap</b></div>
+        </div>
+        <div class="hint">
+          Swipe di kotak atas (atau <b>drag mouse</b>) ke arah ↑ ↓ ← → sesuai not yang kamu mau.
+          Keyboard juga bisa: <b>WASD</b> untuk lane kiri, <b>tombol panah</b> untuk lane kanan.
+        </div>
+      </div>
+
+      <div class="ed-sec">
+        <h3>4 · Simpan &amp; Pakai</h3>
+        <div class="row">
+          <button id="edTest" class="primary" type="button">▶ Tes Level Ini</button>
+          <button id="edSave" type="button">💾 Unduh .lvl</button>
+          <span class="file-btn"><button type="button">📂 Buka .lvl</button>
+            <input type="file" id="edLoad" accept=".lvl,.json"></span>
+          <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--dim)">
+            <input type="checkbox" id="edEmbed"> Sertakan audio di dalam .lvl
+          </label>
+        </div>
+        <div class="hint" id="edSaveInfo">
+          File <b>.lvl</b> berisi semua notmu. Tanpa centang "sertakan audio", filenya kecil
+          (beberapa KB) tapi butuh file lagu terpisah. Dengan centang, filenya berdiri sendiri
+          (ukurannya jadi sebesar lagu) dan bisa langsung di-drop ke game.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/synth.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/game.js"></script>
+<script src="js/editor.js"></script>
 </body>
 </html>
