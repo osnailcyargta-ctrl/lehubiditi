@@ -321,9 +321,9 @@ private fun DrawScope.drawConnectors(layout: ScriptLayout) {
         val path = Path().apply {
             moveTo(c.fromX, c.fromY)
             lineTo(midX - radius, c.fromY)
-            quadraticBezierTo(midX, c.fromY, midX, c.fromY + radius * dirSign(c.toY - c.fromY))
+            quadraticTo(midX, c.fromY, midX, c.fromY + radius * dirSign(c.toY - c.fromY))
             lineTo(midX, c.toY - radius * dirSign(c.toY - c.fromY))
-            quadraticBezierTo(midX, c.toY, midX + radius, c.toY)
+            quadraticTo(midX, c.toY, midX + radius, c.toY)
             lineTo(c.toX, c.toY)
         }
         drawPath(path, color, style = stroke)

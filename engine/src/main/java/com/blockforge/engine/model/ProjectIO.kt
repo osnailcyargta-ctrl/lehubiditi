@@ -1,10 +1,12 @@
 package com.blockforge.engine.model
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 
 /** Single source of truth for how `game.json` is written and read, editor and runtime alike. */
 object ProjectIO {
 
+    @OptIn(ExperimentalSerializationApi::class)
     val json: Json = Json {
         prettyPrint = true
         prettyPrintIndent = "  "

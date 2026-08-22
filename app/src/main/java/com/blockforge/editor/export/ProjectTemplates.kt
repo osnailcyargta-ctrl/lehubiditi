@@ -154,7 +154,7 @@ object ProjectTemplates {
                     android:label="@string/app_name"
                     android:supportsRtl="true"
                     android:hardwareAccelerated="true"
-                    android:theme="@android:style/Theme.Material.NoTitleBar.Fullscreen">
+                    android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen">
 
                     <activity
                         android:name=".GameActivity"
