@@ -44,11 +44,15 @@ class ExportedProjectTest {
         assertTrue("game.json missing", gameJson.isFile)
         val roundTripped = ProjectIO.decode(gameJson.readText())
         assertEquals(project.name, roundTripped.name)
-        assertEquals(project.scenes.size, roundTripped.scenes.size)
-        assertEquals(
-            project.scenes.sumOf { it.objects.size },
-            roundTripped.scenes.sumOf { it.objects.size }
+        // Counts are compared as booleans: assertEquals(Int, Int) is ambiguous in Kotlin against
+        // JUnit 4's assertEquals(long, long) / assertEquals(Object, Object) pair.
+        assertTrue(
+            "scene count changed: ${project.scenes.size} -> ${roundTripped.scenes.size}",
+            project.scenes.size == roundTripped.scenes.size
         )
+        val before = project.scenes.sumOf { it.objects.size }
+        val after = roundTripped.scenes.sumOf { it.objects.size }
+        assertTrue("object count changed: $before -> $after", before == after)
 
         val activity = File(outDir, "app/src/main/java/${project.packageId.replace('.', '/')}/GameActivity.kt")
         assertTrue("GameActivity not written to its package path", activity.isFile)

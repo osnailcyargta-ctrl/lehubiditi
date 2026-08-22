@@ -32,12 +32,16 @@ jobs:
           ./gradlew :app:assembleDebug --console=plain 2>&1 | tee build.log
 
       # Gradle's stack trace buries the compiler output; repeat just the errors at the end.
+      # `shell: bash` runs with pipefail, so a `|| echo none` fallback here would swallow real
+      # output whenever grep exits non-zero. Print unconditionally instead.
       - name: Compiler errors
         if: failure()
         shell: bash
         run: |
           echo "--- Kotlin/Java errors ---"
-          grep -E "^(e:|error:)" build.log | head -80 || echo "(none found)"
+          grep -E "^(e:|error:)" build.log | head -80 || true
+          echo "--- gradle output (tail) ---"
+          tail -n 60 build.log || true
 
       - name: Upload editor APK
         if: success()
@@ -87,7 +91,7 @@ jobs:
           chmod +x gradlew
           if ! ./gradlew assembleDebug --console=plain 2>&1 | tee build.log; then
             echo "=== compiler errors in the exported project ==="
-            grep -E "^(e:|error:)" build.log | head -60 || echo "(none)"
+            grep -E "^(e:|error:)" build.log | head -60 || true
             echo "=== gradle output (tail) ==="
             tail -n 80 build.log
             exit 1
@@ -101,8 +105,7 @@ jobs:
         shell: bash
         run: |
           echo "::group::compiler errors"
-          grep -hE "^(e:|error:)" generate.log app/build/exported-sample/build.log 2>/dev/null | head -60 \
-            || echo "(none)"
+          grep -hE "^(e:|error:)" generate.log app/build/exported-sample/build.log 2>/dev/null | head -60 || true
           echo "::endgroup::"
 
           echo "::group::unit test failures"
@@ -123,8 +126,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::exported project tree"
-          find app/build/exported-sample -maxdepth 4 -not -path '*/.gradle/*' 2>/dev/null | head -60 \
-            || echo "(nothing generated)"
+          find app/build/exported-sample -maxdepth 4 -not -path '*/.gradle/*' 2>/dev/null | head -60 || true
           echo "::endgroup::"
 
       - name: Upload exported game APK
