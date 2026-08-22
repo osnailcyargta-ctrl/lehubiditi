@@ -137,5 +137,16 @@ wrapper) supaya eksporter bisa menuliskannya kembali ke proyek hasil ekspor.
 ./gradlew :app:assembleDebug     # → app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Butuh JDK 17 dan Android SDK 35. Workflow `.github/workflows/android.yml` membangun dan mengunggah
-APK editor pada setiap push.
+Butuh JDK 17 dan Android SDK 35.
+
+## Yang diperiksa CI
+
+`.github/workflows/android.yml` menjalankan dua pekerjaan pada setiap push:
+
+| Pekerjaan | Yang dibuktikan |
+|---|---|
+| `build` | APK editor terkompilasi, lalu diunggah sebagai artefak. |
+| `exported-project` | `ExportedProjectTest` menuliskan satu proyek hasil ekspor yang utuh ke `app/build/exported-sample`, lalu `./gradlew assembleDebug` dijalankan **di dalam** proyek itu. APK gamenya juga diunggah. |
+
+Pekerjaan kedua itu yang membuat kalimat "siap build di Android Studio" bisa dipercaya: kalau
+sebuah template rusak atau runtime engine tidak lagi bisa berdiri sendiri, build-nya merah.
