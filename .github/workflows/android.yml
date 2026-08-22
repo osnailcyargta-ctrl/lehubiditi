@@ -66,8 +66,18 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          ./gradlew :app:testDebugUnitTest --tests 'com.blockforge.editor.export.ExportedProjectTest' \
-            --console=plain 2>&1 | tee generate.log
+          if ! ./gradlew :app:testDebugUnitTest --console=plain 2>&1 | tee generate.log; then
+            echo "=== gradle output (tail) ==="
+            tail -n 80 generate.log
+            echo "=== unit test results ==="
+            for f in app/build/test-results/testDebugUnitTest/*.xml; do
+              [ -f "$f" ] || continue
+              echo "--- $f"
+              head -c 4000 "$f"
+              echo
+            done
+            exit 1
+          fi
 
       - name: Build the exported project
         shell: bash
@@ -75,7 +85,14 @@ jobs:
         run: |
           set -o pipefail
           chmod +x gradlew
-          ./gradlew assembleDebug --console=plain 2>&1 | tee build.log
+          if ! ./gradlew assembleDebug --console=plain 2>&1 | tee build.log; then
+            echo "=== compiler errors in the exported project ==="
+            grep -E "^(e:|error:)" build.log | head -60 || echo "(none)"
+            echo "=== gradle output (tail) ==="
+            tail -n 80 build.log
+            exit 1
+          fi
+          ls -la app/build/outputs/apk/debug/
 
       # A failure here can be a compiler error, a failed assertion, or Gradle refusing to start,
       # so show all three rather than grepping for one of them.
