@@ -55,6 +55,15 @@ val stageWrapper by tasks.registering(Copy::class) {
     into(layout.projectDirectory.dir("src/main/assets/wrapper"))
 }
 
+/**
+ * [com.blockforge.editor.export.ExportedProjectTest] writes a full exported project here; CI then
+ * builds it, so the export path is verified rather than assumed.
+ */
+tasks.withType<Test>().configureEach {
+    systemProperty("blockforge.repoRoot", rootProject.projectDir.absolutePath)
+    systemProperty("blockforge.exportDir", layout.buildDirectory.dir("exported-sample").get().asFile.absolutePath)
+}
+
 tasks.named("preBuild") {
     dependsOn(stageEngineSources, stageWrapper)
 }
@@ -81,4 +90,5 @@ dependencies {
     implementation(libs.androidx.material.icons.core)
     implementation(libs.kotlinx.serialization.json)
     debugImplementation(libs.androidx.ui.tooling)
+    testImplementation(libs.junit)
 }

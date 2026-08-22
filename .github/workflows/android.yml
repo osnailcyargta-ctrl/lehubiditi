@@ -39,10 +39,56 @@ jobs:
           echo "--- Kotlin/Java errors ---"
           grep -E "^(e:|error:)" build.log | head -80 || echo "(none found)"
 
-      - name: Upload APK
+      - name: Upload editor APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: blockforge2d-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+  # Proves the headline feature: a project produced by the exporter really does build into an APK.
+  exported-project:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Generate a sample exported project
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew :app:testDebugUnitTest --tests 'com.blockforge.editor.export.ExportedProjectTest' \
+            --console=plain 2>&1 | tee generate.log
+
+      - name: Build the exported project
+        shell: bash
+        working-directory: app/build/exported-sample
+        run: |
+          set -o pipefail
+          chmod +x gradlew
+          ./gradlew assembleDebug --console=plain 2>&1 | tee build.log
+
+      - name: Compiler errors
+        if: failure()
+        shell: bash
+        run: |
+          echo "--- errors while exporting or building the exported project ---"
+          grep -hE "^(e:|error:)" generate.log app/build/exported-sample/build.log 2>/dev/null | head -80 \
+            || echo "(none found)"
+
+      - name: Upload exported game APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exported-game-debug-apk
+          path: app/build/exported-sample/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
